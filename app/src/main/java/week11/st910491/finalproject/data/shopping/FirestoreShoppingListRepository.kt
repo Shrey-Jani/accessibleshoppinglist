@@ -1,0 +1,79 @@
+package week11.st910491.finalproject.data.shopping
+
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import week11.st910491.finalproject.domain.model.ShoppingItem
+
+class FirestoreShoppingListRepository(
+    private val userId: String,
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+) : ShoppingListRepository {
+
+    private val itemsCollection = db
+        .collection("users")
+        .document(userId)
+        .collection("items")
+
+    override fun getItems(): Flow<List<ShoppingItem>> = callbackFlow {
+        val listenerRegistration = itemsCollection
+            .orderBy("createdAt")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    // Close the flow with the error
+                    close(error)
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val items = snapshot.documents.map { doc ->
+                        ShoppingItem(
+                            id = doc.id,
+                            name = doc.getString("name") ?: "",
+                            quantity = (doc.getLong("quantity") ?: 1L).toInt(),
+                            isPurchased = doc.getBoolean("isPurchased") ?: false,
+                            category = doc.getString("category") ?: "",
+                            notes = doc.getString("notes") ?: "",
+                            createdAt = doc.getLong("createdAt") ?: 0L
+                        )
+                    }
+                    trySend(items).isSuccess
+                }
+            }
+
+        awaitClose {
+            listenerRegistration.remove()
+        }
+    }
+
+    override suspend fun addItem(item: ShoppingItem) {
+        val data = mapOf(
+            "name" to item.name,
+            "quantity" to item.quantity,
+            "isPurchased" to item.isPurchased,
+            "category" to item.category,
+            "notes" to item.notes,
+            "createdAt" to item.createdAt
+        )
+        itemsCollection.add(data).await()
+    }
+
+    override suspend fun updateItem(item: ShoppingItem) {
+        if (item.id.isBlank()) return
+        val data = mapOf(
+            "name" to item.name,
+            "quantity" to item.quantity,
+            "isPurchased" to item.isPurchased,
+            "category" to item.category,
+            "notes" to item.notes,
+            "createdAt" to item.createdAt
+        )
+        itemsCollection.document(item.id).set(data).await()
+    }
+
+    override suspend fun deleteItem(id: String) {
+        if (id.isBlank()) return
+        itemsCollection.document(id).delete().await()
+    }
+}

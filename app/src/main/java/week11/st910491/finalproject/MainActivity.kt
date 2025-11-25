@@ -12,7 +12,6 @@ import week11.st910491.finalproject.navigation.AppNavHost
 import week11.st910491.finalproject.ui.auth.AuthViewModel
 import week11.st910491.finalproject.ui.theme.AccessibleShoppingListTheme
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,10 +21,12 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val authViewModel: AuthViewModel = viewModel()
 
-                AppNavHost(
-                    navController = navController,
-                    authViewModel = authViewModel
-                )
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    AppNavHost(
+                        navController = navController,
+                        authViewModel = authViewModel
+                    )
+                }
             }
         }
     }

@@ -30,7 +30,6 @@ fun LoginScreen(
 ) {
     val state by viewModel.loginState.collectAsState()
 
-    // Password visibility state (remembered across recompositions)
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.isSuccess) {

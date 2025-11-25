@@ -29,7 +29,6 @@ fun RegisterScreen(
 ) {
     val state by viewModel.registerState.collectAsState()
 
-    // Separate visibility toggles for each password field
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     var confirmPasswordVisible by rememberSaveable { mutableStateOf(false) }
 

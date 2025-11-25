@@ -32,13 +32,10 @@ fun AppNavHost(
                     navController.navigate(Routes.SHOPPING_LIST) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
+                    authViewModel.resetLoginSuccess()
                 },
-                onNavigateToRegister = {
-                    navController.navigate(Routes.REGISTER)
-                },
-                onNavigateToForgot = {
-                    navController.navigate(Routes.FORGOT)
-                }
+                onNavigateToRegister = { navController.navigate(Routes.REGISTER) },
+                onNavigateToForgot = { navController.navigate(Routes.FORGOT) }
             )
         }
 
@@ -47,9 +44,10 @@ fun AppNavHost(
             RegisterScreen(
                 viewModel = authViewModel,
                 onRegisterSuccess = {
-                    navController.navigate(Routes.SHOPPING_LIST) {
+                    navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
+                    authViewModel.resetRegisterSuccess()
                 },
                 onBackToLogin = { navController.popBackStack() }
             )
@@ -63,9 +61,11 @@ fun AppNavHost(
             )
         }
 
-        // Shopping list (your main screen – currently no parameters)
+        // Shopping list – passes navController directly
         composable(Routes.SHOPPING_LIST) {
-            ShoppingListScreen()
+            ShoppingListScreen(
+                navController = navController
+            )
         }
 
         // Settings
@@ -73,20 +73,9 @@ fun AppNavHost(
             SettingsScreen()
         }
 
-        // Add / Edit item
+        // Add/Edit item
         composable(Routes.ADD_EDIT_ITEM) {
             AddEditItemScreen()
         }
-
-        composable(Routes.SHOPPING_LIST) {
-            ShoppingListScreen(
-                onLogout = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.SHOPPING_LIST) { inclusive = true }
-                    }
-                }
-            )
-        }
-
     }
 }

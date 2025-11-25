@@ -20,7 +20,7 @@ class AuthViewModel(
     private val _forgotState = MutableStateFlow(AuthUiState())
     val forgotState: StateFlow<AuthUiState> = _forgotState
 
-    // -------- LOGIN --------
+    // ---------- LOGIN ----------
 
     fun onLoginEmailChange(value: String) {
         _loginState.value = _loginState.value.copy(email = value, errorMessage = null)
@@ -56,15 +56,18 @@ class AuthViewModel(
         }
     }
 
-    // -------- REGISTER --------
+    fun resetLoginSuccess() {
+        _loginState.value = _loginState.value.copy(isSuccess = false)
+    }
+
+    // ---------- REGISTER ----------
 
     fun onRegisterEmailChange(value: String) {
         _registerState.value = _registerState.value.copy(email = value, errorMessage = null)
     }
 
     fun onRegisterPasswordChange(value: String) {
-        _registerState.value =
-            _registerState.value.copy(password = value, errorMessage = null)
+        _registerState.value = _registerState.value.copy(password = value, errorMessage = null)
     }
 
     fun onRegisterConfirmPasswordChange(value: String) {
@@ -104,7 +107,11 @@ class AuthViewModel(
         }
     }
 
-    // -------- FORGOT PASSWORD --------
+    fun resetRegisterSuccess() {
+        _registerState.value = _registerState.value.copy(isSuccess = false)
+    }
+
+    // ---------- FORGOT PASSWORD ----------
 
     fun onForgotEmailChange(value: String) {
         _forgotState.value = _forgotState.value.copy(email = value, errorMessage = null)
