@@ -1,20 +1,30 @@
 package week11.st910491.finalproject.ui.shoppinglist
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -23,162 +33,160 @@ import com.google.firebase.auth.FirebaseAuth
 import week11.st910491.finalproject.domain.model.ShoppingItem
 import week11.st910491.finalproject.navigation.Routes
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
     navController: NavHostController,
     viewModel: ShoppingListViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val items = state.data.orEmpty()
 
-    var nameInput by rememberSaveable { mutableStateOf("") }
-    var quantityInput by rememberSaveable { mutableStateOf("1") }
-    var categoryInput by rememberSaveable { mutableStateOf("") }
-    var notesInput by rememberSaveable { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-    ) {
-        // Header + Logout
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(text = "Shopping List")
-            Button(
-                onClick = {
-                    // Direct logout + navigation from this screen
-                    FirebaseAuth.getInstance().signOut()
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.SHOPPING_LIST) { inclusive = true }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Shopping list") },
+                actions = {
+                    TextButton(onClick = { navController.navigate(Routes.SETTINGS) }) {
+                        Text("Settings")
+                    }
+                    TextButton(
+                        onClick = {
+                            FirebaseAuth.getInstance().signOut()
+                            navController.navigate(Routes.LOGIN) {
+                                popUpTo(Routes.SHOPPING_LIST) { inclusive = true }
+                            }
+                        }
+                    ) {
+                        Text("Logout")
                     }
                 }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { navController.navigate(Routes.ADD_EDIT_ITEM) }
             ) {
-                Text(text = "Logout")
+                Text("Add item")
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Create item form
-        OutlinedTextField(
-            value = nameInput,
-            onValueChange = { nameInput = it },
-            label = { Text("Item name") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = quantityInput,
-            onValueChange = { quantityInput = it },
-            label = { Text("Quantity (default 1)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = categoryInput,
-            onValueChange = { categoryInput = it },
-            label = { Text("Category (optional)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = notesInput,
-            onValueChange = { notesInput = it },
-            label = { Text("Notes (optional)") },
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp)
-        )
-
-        Button(
-            onClick = {
-                val qty = quantityInput.toIntOrNull() ?: 1
-                viewModel.addItem(
-                    name = nameInput.trim(),
-                    quantity = qty,
-                    category = categoryInput.trim(),
-                    notes = notesInput.trim()
-                )
-                // clear inputs
-                nameInput = ""
-                quantityInput = "1"
-                categoryInput = ""
-                notesInput = ""
-            },
-            enabled = nameInput.isNotBlank(),
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .align(Alignment.End)
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            Text(text = "Add item")
-        }
+            if (state.isLoading) {
+                Text("Loading...")
+                Spacer(modifier = Modifier.height(8.dp))
+                Divider()
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Divider()
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Error + loading
-        if (state.isLoading) {
-            Text(text = "Loading...")
-        }
-        if (state.errorMessage != null) {
-            Text(text = "Error: ${state.errorMessage}")
-        }
-
-        // Items list
-        val items = state.data.orEmpty()
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(items) { item ->
-                ShoppingListItemRow(
-                    item = item,
-                    onTogglePurchased = { viewModel.togglePurchased(item) },
-                    onDelete = { viewModel.deleteItem(item) }
+            if (state.errorMessage != null) {
+                Text(
+                    text = state.errorMessage!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            if (!state.isLoading && items.isEmpty()) {
+                Text(
+                    text = "Your list is empty. Tap \"Add item\" to start.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(items) { item ->
+                        ShoppingListItemCard(
+                            item = item,
+                            onTogglePurchased = { viewModel.togglePurchased(item) },
+                            onDelete = { viewModel.deleteItem(item) }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ShoppingListItemRow(
+private fun ShoppingListItemCard(
     item: ShoppingItem,
     onTogglePurchased: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
+    Card(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(text = item.name)
-        Text(text = "Quantity: ${item.quantity}")
-        if (item.category.isNotBlank()) {
-            Text(text = "Category: ${item.category}")
-        }
-        if (item.notes.isNotBlank()) {
-            Text(text = "Notes: ${item.notes}")
-        }
-        Text(text = if (item.isPurchased) "Status: Purchased" else "Status: Not purchased")
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            TextButton(onClick = onTogglePurchased) {
-                Text(text = if (item.isPurchased) "Unmark purchased" else "Mark purchased")
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "Quantity: ${item.quantity}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (item.category.isNotBlank()) {
+                Text(
+                    text = "Category: ${item.category}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
-            TextButton(onClick = onDelete) {
-                Text(text = "Delete")
+            if (item.notes.isNotBlank()) {
+                Text(
+                    text = item.notes,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Text(
+                text = if (item.isPurchased) "Purchased" else "Not purchased",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (item.isPurchased) {
+                    MaterialTheme.colorScheme.secondary
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = onTogglePurchased,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 48.dp)
+                ) {
+                    Text(
+                        text = if (item.isPurchased) "Mark not purchased"
+                        else "Mark purchased"
+                    )
+                }
+                OutlinedButton(
+                    onClick = onDelete,
+                    modifier = Modifier
+                        .weight(1f)
+                        .heightIn(min = 48.dp)
+                ) {
+                    Text("Delete")
+                }
             }
         }
     }
 }
+
