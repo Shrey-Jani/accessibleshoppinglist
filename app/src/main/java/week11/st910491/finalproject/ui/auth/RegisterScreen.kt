@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -41,20 +43,31 @@ fun RegisterScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 24.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 420.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Text(text = "Register")
+            Text(
+                text = "Create your account",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "Use a valid email and a strong password.",
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             OutlinedTextField(
                 value = state.email,
                 onValueChange = viewModel::onRegisterEmailChange,
                 label = { Text("Email") },
-                singleLine = true
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -67,50 +80,59 @@ fun RegisterScreen(
                 } else {
                     PasswordVisualTransformation()
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
             )
 
-            TextButton(
-                onClick = { passwordVisible = !passwordVisible }
-            ) {
-                Text(
-                    text = if (passwordVisible) "Hide password" else "Show password"
-                )
+            TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                Text(text = if (passwordVisible) "Hide password" else "Show password")
             }
 
             OutlinedTextField(
                 value = state.confirmPassword,
                 onValueChange = viewModel::onRegisterConfirmPasswordChange,
-                label = { Text("Confirm Password") },
+                label = { Text("Confirm password") },
                 singleLine = true,
                 visualTransformation = if (confirmPasswordVisible) {
                     VisualTransformation.None
                 } else {
                     PasswordVisualTransformation()
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
             )
 
-            TextButton(
-                onClick = { confirmPasswordVisible = !confirmPasswordVisible }
-            ) {
+            TextButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                 Text(
-                    text = if (confirmPasswordVisible) "Hide confirm password" else "Show confirm password"
+                    text = if (confirmPasswordVisible) "Hide confirm password"
+                    else "Show confirm password"
                 )
             }
 
             if (state.errorMessage != null) {
-                Text(text = state.errorMessage!!)
+                Text(
+                    text = state.errorMessage!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             Button(
                 enabled = !state.isLoading,
-                onClick = { viewModel.register() }
+                onClick = { viewModel.register() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
             ) {
                 Text("Create account")
             }
 
-            Button(onClick = onBackToLogin) {
+            OutlinedButton(
+                onClick = onBackToLogin,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+            ) {
                 Text("Back to login")
             }
 
