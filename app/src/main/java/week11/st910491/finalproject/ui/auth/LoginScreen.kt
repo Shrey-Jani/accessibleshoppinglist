@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,7 +31,6 @@ fun LoginScreen(
     onNavigateToForgot: () -> Unit
 ) {
     val state by viewModel.loginState.collectAsState()
-
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.isSuccess) {
@@ -41,20 +42,36 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(horizontal = 24.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 420.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.Start
         ) {
-            Text(text = "Login")
+            Text(
+                text = "Accessible Shopping List",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Welcome back",
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = "Sign in to manage your shopping items.",
+                style = MaterialTheme.typography.bodyMedium
+            )
 
             OutlinedTextField(
                 value = state.email,
                 onValueChange = viewModel::onLoginEmailChange,
                 label = { Text("Email") },
-                singleLine = true
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
@@ -67,7 +84,8 @@ fun LoginScreen(
                 } else {
                     PasswordVisualTransformation()
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                modifier = Modifier.fillMaxWidth()
             )
 
             TextButton(
@@ -79,21 +97,36 @@ fun LoginScreen(
             }
 
             if (state.errorMessage != null) {
-                Text(text = state.errorMessage!!)
+                Text(
+                    text = state.errorMessage!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             Button(
                 enabled = !state.isLoading,
-                onClick = { viewModel.login() }
+                onClick = { viewModel.login() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
             ) {
                 Text(text = "Login")
             }
 
-            Button(onClick = onNavigateToRegister) {
+            OutlinedButton(
+                onClick = onNavigateToRegister,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+            ) {
                 Text("Create account")
             }
 
-            Button(onClick = onNavigateToForgot) {
+            TextButton(
+                onClick = onNavigateToForgot,
+                modifier = Modifier.align(Alignment.End)
+            ) {
                 Text("Forgot password")
             }
 
