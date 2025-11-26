@@ -61,21 +61,25 @@ fun AppNavHost(
             )
         }
 
-        // Shopping list – passes navController directly
+        // Shopping list
         composable(Routes.SHOPPING_LIST) {
             ShoppingListScreen(
                 navController = navController
             )
         }
 
-        // Settings
+        // Settings (now receives navController so we can show Back)
         composable(Routes.SETTINGS) {
-            SettingsScreen()
+            SettingsScreen(
+                navController = navController
+            )
         }
 
         // Add/Edit item
         composable(Routes.ADD_EDIT_ITEM) {
-            AddEditItemScreen()
+            AddEditItemScreen(
+                navController = navController
+            )
         }
     }
 }
