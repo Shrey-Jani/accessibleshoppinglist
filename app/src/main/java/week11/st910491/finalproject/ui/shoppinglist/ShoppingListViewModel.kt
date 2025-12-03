@@ -41,9 +41,9 @@ class ShoppingListViewModel : ViewModel() {
     }
 
     private fun loadItems() {
+        val repo = repository ?: return
         viewModelScope.launch {
-            repository!!
-                .getItems()
+            repo.getItems()
                 .catch { e ->
                     _uiState.value = UiState(
                         isLoading = false,
@@ -61,6 +61,7 @@ class ShoppingListViewModel : ViewModel() {
         }
     }
 
+    // Existing version used by your old Add screen (string params)
     fun addItem(name: String, quantity: Int, category: String, notes: String) {
         val repo = repository ?: return   // Safe on logout
         if (name.isBlank()) return
@@ -73,6 +74,22 @@ class ShoppingListViewModel : ViewModel() {
                     category = category,
                     notes = notes
                 )
+                repo.addItem(item)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = e.message ?: "Error adding item"
+                )
+            }
+        }
+    }
+
+    // NEW: overload used by AddEditItemScreen (passes full ShoppingItem)
+    fun addItem(item: ShoppingItem) {
+        val repo = repository ?: return
+        if (item.name.isBlank()) return
+
+        viewModelScope.launch {
+            try {
                 repo.addItem(item)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
@@ -110,6 +127,33 @@ class ShoppingListViewModel : ViewModel() {
                     errorMessage = e.message ?: "Error updating item"
                 )
             }
+        }
+    }
+
+    // NEW: update used by Edit mode
+    fun updateItem(item: ShoppingItem) {
+        val repo = repository ?: return
+        if (item.id.isBlank()) return
+
+        viewModelScope.launch {
+            try {
+                repo.updateItem(item)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    errorMessage = e.message ?: "Error updating item"
+                )
+            }
+        }
+    }
+
+    // NEW: fetch single item for Edit screen (by id)
+    suspend fun getItemById(id: String): ShoppingItem? {
+        val repo = repository
+        // Only FirestoreShoppingListRepository exposes getItemById
+        return if (repo is FirestoreShoppingListRepository) {
+            repo.getItemById(id)
+        } else {
+            null
         }
     }
 }
