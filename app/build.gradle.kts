@@ -61,6 +61,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("com.google.firebase:firebase-firestore")
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.runtime.saveable)
+    implementation(libs.androidx.compose.foundation)
 //    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -69,5 +71,9 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+
+    implementation("androidx.compose.material:material-icons-extended")
+
 
 }
