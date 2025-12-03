@@ -16,24 +16,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
+import week11.st910491.finalproject.data.UserPreferencesRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    userPreferencesRepository: UserPreferencesRepository
 ) {
-    // Step-2: these are local only; later you can connect to DataStore.
-    var highContrastEnabled by rememberSaveable { mutableStateOf(false) }
-    var largeTextEnabled by rememberSaveable { mutableStateOf(false) }
-    var oneHandModeEnabled by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val highContrastEnabled by userPreferencesRepository.isHighContrast.collectAsState(initial = false)
+    val largeTextEnabled by userPreferencesRepository.isLargeText.collectAsState(initial = false)
+    val oneHandModeEnabled by userPreferencesRepository.isOneHanded.collectAsState(initial = false)
 
     Scaffold(
         topBar = {
@@ -63,28 +65,33 @@ fun SettingsScreen(
                 title = "High-contrast mode",
                 description = "Use stronger colours and contrast for better visibility.",
                 checked = highContrastEnabled,
-                onCheckedChange = { highContrastEnabled = it }
+                onCheckedChange = { enabled ->
+                    scope.launch {
+                        userPreferencesRepository.setHighContrast(enabled)
+                    }
+                }
             )
 
             SettingToggleRow(
                 title = "Large text",
                 description = "Increase text size across the app for easier reading.",
                 checked = largeTextEnabled,
-                onCheckedChange = { largeTextEnabled = it }
+                onCheckedChange = { enabled ->
+                    scope.launch {
+                        userPreferencesRepository.setLargeText(enabled)
+                    }
+                }
             )
 
             SettingToggleRow(
                 title = "One-hand mode",
                 description = "Keep important actions near the bottom of the screen.",
                 checked = oneHandModeEnabled,
-                onCheckedChange = { oneHandModeEnabled = it }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Note: In the final step these toggles will be persisted " +
-                        "using DataStore and applied to the app theme.",
-                style = MaterialTheme.typography.bodyMedium
+                onCheckedChange = { enabled ->
+                    scope.launch {
+                        userPreferencesRepository.setOneHanded(enabled)
+                    }
+                }
             )
         }
     }

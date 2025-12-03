@@ -11,20 +11,34 @@ import androidx.navigation.compose.rememberNavController
 import week11.st910491.finalproject.navigation.AppNavHost
 import week11.st910491.finalproject.ui.auth.AuthViewModel
 import week11.st910491.finalproject.ui.theme.AccessibleShoppingListTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        val userPreferencesRepository = week11.st910491.finalproject.data.UserPreferencesRepository(this)
+
         setContent {
-            AccessibleShoppingListTheme {
+            val isHighContrast by userPreferencesRepository.isHighContrast.collectAsState(initial = false)
+            val isLargeText by userPreferencesRepository.isLargeText.collectAsState(initial = false)
+            val isOneHanded by userPreferencesRepository.isOneHanded.collectAsState(initial = false)
+
+            AccessibleShoppingListTheme(
+                highContrast = isHighContrast,
+                largeText = isLargeText
+            ) {
                 val navController = rememberNavController()
                 val authViewModel: AuthViewModel = viewModel()
 
                 Surface(color = MaterialTheme.colorScheme.background) {
                     AppNavHost(
                         navController = navController,
-                        authViewModel = authViewModel
+                        authViewModel = authViewModel,
+                        userPreferencesRepository = userPreferencesRepository,
+                        isOneHanded = isOneHanded
                     )
                 }
             }

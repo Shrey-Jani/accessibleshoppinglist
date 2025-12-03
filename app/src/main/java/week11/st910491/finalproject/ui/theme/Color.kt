@@ -28,3 +28,14 @@ val TextPrimaryDark = Color(0xFFF9FAFB)
 
 val ErrorRed = Color(0xFFDC2626)
 val ErrorRedDark = Color(0xFFFCA5A5)
+
+// High Contrast Palette
+val HighContrastBackground = Color(0xFF000000)
+val HighContrastSurface = Color(0xFF000000)
+val HighContrastText = Color(0xFFFFFFFF)
+val HighContrastPrimary = Color(0xFFFFFF00) // Yellow
+val HighContrastOnPrimary = Color(0xFF000000)
+val HighContrastSecondary = Color(0xFF00FFFF) // Cyan
+val HighContrastOnSecondary = Color(0xFF000000)
+val HighContrastError = Color(0xFFFF0000)
+val HighContrastOnError = Color(0xFFFFFFFF)
