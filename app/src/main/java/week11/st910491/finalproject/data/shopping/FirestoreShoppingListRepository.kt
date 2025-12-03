@@ -22,7 +22,6 @@ class FirestoreShoppingListRepository(
             .orderBy("createdAt")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    // Close the flow with the error
                     close(error)
                     return@addSnapshotListener
                 }
@@ -75,5 +74,22 @@ class FirestoreShoppingListRepository(
     override suspend fun deleteItem(id: String) {
         if (id.isBlank()) return
         itemsCollection.document(id).delete().await()
+    }
+
+    // NEW: fetch single item for Edit screen
+    suspend fun getItemById(id: String): ShoppingItem? {
+        if (id.isBlank()) return null
+        val doc = itemsCollection.document(id).get().await()
+        if (!doc.exists()) return null
+
+        return ShoppingItem(
+            id = doc.id,
+            name = doc.getString("name") ?: "",
+            quantity = (doc.getLong("quantity") ?: 1L).toInt(),
+            isPurchased = doc.getBoolean("isPurchased") ?: false,
+            category = doc.getString("category") ?: "",
+            notes = doc.getString("notes") ?: "",
+            createdAt = doc.getLong("createdAt") ?: 0L
+        )
     }
 }
