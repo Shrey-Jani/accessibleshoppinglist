@@ -13,9 +13,9 @@ Accessible Shopping List is an Android application designed to make shopping lis
 - **Real-time Database**: Shopping lists are synced in real-time using Cloud Firestore.
 - **Voice Input**: Add items simply by speaking, powered by Android's SpeechRecognizer.
 - **Accessibility Settings**:
-    - **High Contrast Mode**: Switches to a high-visibility black/white/yellow theme.
-    - **Large Text Mode**: Increases text size for better readability.
-    - **One-Handed Mode**: Moves interactive elements to the bottom of the screen for easier reach.
+- **High Contrast Mode**: Switches to a high-visibility black/white/yellow theme.
+- **Large Text Mode**: Increases text size for better readability.
+- **One-Handed Mode**: Moves interactive elements to the bottom of the screen for easier reach.
 
 ## Tech Stack
 - **Language**: Kotlin
