@@ -19,7 +19,9 @@ import week11.st910491.finalproject.ui.shoppinglist.ShoppingListScreen
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userPreferencesRepository: week11.st910491.finalproject.data.UserPreferencesRepository,
+    isOneHanded: Boolean
 ) {
     val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
 
@@ -67,22 +69,24 @@ fun AppNavHost(
         // Shopping list
         composable(Routes.SHOPPING_LIST) {
             ShoppingListScreen(
-                navController = navController
+                navController = navController,
+                isOneHanded = isOneHanded
             )
         }
 
-        // Settings
+        // Settings (now receives navController so we can show Back)
         composable(Routes.SETTINGS) {
             SettingsScreen(
-                navController = navController
+                navController = navController,
+                userPreferencesRepository = userPreferencesRepository
             )
         }
 
-        // Add/Edit item - ADD mode (no id)
+        // Add/Edit item
         composable(Routes.ADD_EDIT_ITEM) {
             AddEditItemScreen(
                 navController = navController,
-                itemId = null
+                itemId = null // TODO: Handle edit mode properly if needed
             )
         }
 
