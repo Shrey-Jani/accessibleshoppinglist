@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+
+import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import week11.st910491.finalproject.ui.addedit.AddEditItemScreen
 import week11.st910491.finalproject.ui.auth.AuthViewModel
@@ -68,17 +71,32 @@ fun AppNavHost(
             )
         }
 
-        // Settings (now receives navController so we can show Back)
+        // Settings
         composable(Routes.SETTINGS) {
             SettingsScreen(
                 navController = navController
             )
         }
 
-        // Add/Edit item
+        // Add/Edit item - ADD mode (no id)
         composable(Routes.ADD_EDIT_ITEM) {
             AddEditItemScreen(
-                navController = navController
+                navController = navController,
+                itemId = null
+            )
+        }
+
+        // Add/Edit item - EDIT mode (with id)
+        composable(
+            route = Routes.ADD_EDIT_ITEM_WITH_ID,
+            arguments = listOf(
+                navArgument("itemId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val itemId = backStackEntry.arguments?.getString("itemId")
+            AddEditItemScreen(
+                navController = navController,
+                itemId = itemId
             )
         }
     }
