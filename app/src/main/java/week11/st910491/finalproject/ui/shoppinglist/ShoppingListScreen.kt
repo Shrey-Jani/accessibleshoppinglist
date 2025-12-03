@@ -36,8 +36,10 @@ import week11.st910491.finalproject.navigation.Routes
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@Composable
 fun ShoppingListScreen(
     navController: NavHostController,
+    isOneHanded: Boolean = false,
     viewModel: ShoppingListViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
