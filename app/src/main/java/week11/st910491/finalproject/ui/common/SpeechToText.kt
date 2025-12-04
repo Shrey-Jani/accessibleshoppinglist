@@ -67,6 +67,10 @@ class SpeechToTextParser(private val context: Context) {
         _state.value = _state.value.copy(isListening = false)
         recognizer.stopListening()
     }
+
+    fun shutdown() {
+        recognizer.destroy()
+    }
 }
 
 data class SpeechState(
