@@ -13,6 +13,7 @@ runtimeSaveable = "1.9.5"
 foundation = "1.9.5"
 material3 = "1.4.0"
 composeMaterial = "1.5.5"
+foundationLayout = "1.9.5"
 #firebaseFirestoreKtx = "26.0.2"
 
 [libraries]
@@ -35,6 +36,7 @@ androidx-compose-runtime-saveable = { group = "androidx.compose.runtime", name =
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 #firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 [plugins]
