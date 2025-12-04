@@ -32,8 +32,10 @@ fun rememberSpeechToText(
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
                 val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                if (!matches.isNullOrEmpty()) {
-                    lastText = matches[0]
+                // Safely pick the first match (if any) instead of indexing directly.
+                val firstMatch = matches?.firstOrNull()
+                if (!firstMatch.isNullOrBlank()) {
+                    lastText = firstMatch
                     onResult(lastText)
                 }
             }

@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "week11.st910491.finalproject"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.androidx.compose.runtime.saveable)
     implementation(libs.androidx.compose.foundation)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material)
 //    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
