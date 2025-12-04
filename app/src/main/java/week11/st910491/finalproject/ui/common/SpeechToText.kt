@@ -1,95 +1,76 @@
 package week11.st910491.finalproject.ui.common
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.os.Bundle
+import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.util.Locale
 
-@Composable
-fun rememberSpeechToText(
-    onResult: (String) -> Unit
-): () -> Unit {
-    val context = LocalContext.current
-    val activity = context as Activity
+class SpeechToTextParser(private val context: Context) {
 
-    var lastText by remember { mutableStateOf("") }
+    private val _state = MutableStateFlow(SpeechState())
+    val state: StateFlow<SpeechState> = _state.asStateFlow()
 
-    val speechLauncher: ActivityResultLauncher<Intent> =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data: Intent? = result.data
-                val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                // Safely pick the first match (if any) instead of indexing directly.
-                val firstMatch = matches?.firstOrNull()
-                if (!firstMatch.isNullOrBlank()) {
-                    lastText = firstMatch
-                    onResult(lastText)
+    private var recognizer: SpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
+
+    fun startListening() {
+        _state.value = SpeechState(isListening = true)
+
+        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
+            _state.value = SpeechState(error = "Speech recognition is not available on this device.")
+            return
+        }
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        }
+
+        recognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {}
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(rmsdB: Float) {}
+            override fun onBufferReceived(buffer: ByteArray?) {}
+            override fun onEndOfSpeech() {
+                _state.value = _state.value.copy(isListening = false)
+            }
+
+            override fun onError(error: Int) {
+                val message = when (error) {
+                    SpeechRecognizer.ERROR_NO_MATCH -> "No speech match found."
+                    SpeechRecognizer.ERROR_NETWORK -> "Network error."
+                    else -> "Error occurred. Please try again."
+                }
+                _state.value = SpeechState(error = message, isListening = false)
+            }
+
+            override fun onResults(results: Bundle?) {
+                val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                if (!matches.isNullOrEmpty()) {
+                    _state.value = SpeechState(spokenText = matches[0], isListening = false)
                 }
             }
-        }
 
-    val permissionLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { isGranted ->
-            if (isGranted) {
-                startSpeechRecognition(activity, speechLauncher)
-            } else {
-                Toast.makeText(
-                    activity,
-                    "Microphone permission is required for speech input",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+            override fun onPartialResults(partialResults: Bundle?) {}
+            override fun onEvent(eventType: Int, params: Bundle?) {}
+        })
 
-    // This is the lambda you call from your Mic button
-    return {
-        if (!SpeechRecognizer.isRecognitionAvailable(context)) {
-            Toast.makeText(
-                context,
-                "Speech recognition is not available on this device/emulator.",
-                Toast.LENGTH_LONG
-            ).show()
-        } else {
-            val hasPermission = ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.RECORD_AUDIO
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        recognizer.startListening(intent)
+    }
 
-            if (hasPermission) {
-                startSpeechRecognition(activity, speechLauncher)
-            } else {
-                permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
-            }
-        }
+    fun stopListening() {
+        _state.value = _state.value.copy(isListening = false)
+        recognizer.stopListening()
     }
 }
 
-private fun startSpeechRecognition(
-    activity: Activity,
-    speechLauncher: ActivityResultLauncher<Intent>
-) {
-    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-        putExtra(
-            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
-        )
-        putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en-US")
-        putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak now…")
-    }
-    speechLauncher.launch(intent)
-}
+data class SpeechState(
+    val spokenText: String = "",
+    val isListening: Boolean = false,
+    val error: String? = null
+)
