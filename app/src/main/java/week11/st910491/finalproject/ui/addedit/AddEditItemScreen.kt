@@ -40,6 +40,13 @@ fun AddEditItemScreen(
     val speechParser = remember { SpeechToTextParser(context) }
     val speechState by speechParser.state.collectAsState()
 
+    // CLEANUP: Destroy SpeechRecognizer when screen is closed to prevent leaks
+    DisposableEffect(Unit) {
+        onDispose {
+            speechParser.shutdown()
+        }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->

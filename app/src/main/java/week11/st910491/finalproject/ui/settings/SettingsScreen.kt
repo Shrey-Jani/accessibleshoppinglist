@@ -8,9 +8,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Contrast
+import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Smartphone
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -80,6 +88,7 @@ fun SettingsScreen(
             SettingToggleRow(
                 title = "High-contrast mode",
                 description = "Use stronger borders and colors for better visibility.",
+                icon = Icons.Default.Contrast,
                 checked = highContrastEnabled,
                 onCheckedChange = { enabled ->
                     view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -94,6 +103,7 @@ fun SettingsScreen(
             SettingToggleRow(
                 title = "Large text",
                 description = "Increase text size across the app for easier reading.",
+                icon = Icons.Default.FormatSize,
                 checked = largeTextEnabled,
                 onCheckedChange = { enabled ->
                     view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -108,6 +118,7 @@ fun SettingsScreen(
             SettingToggleRow(
                 title = "One-hand mode",
                 description = "Move main actions (like Add and Settings) to the bottom of the screen.",
+                icon = Icons.Default.Smartphone,
                 checked = oneHandModeEnabled,
                 onCheckedChange = { enabled ->
                     view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
@@ -115,6 +126,28 @@ fun SettingsScreen(
                         userPreferencesRepository.setOneHanded(enabled)
                     }
                 }
+            )
+            
+            HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+
+            // 4. Help Section
+            Text(
+                text = "Help & Guide",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            
+            HelpRow(
+                icon = Icons.Default.Mic,
+                title = "Voice Commands",
+                description = "Tap the microphone on the 'Add Item' screen and say the item name (e.g., 'Milk')."
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            HelpRow(
+                icon = Icons.Default.VolumeUp,
+                title = "Text-to-Speech",
+                description = "Tap 'Read List Aloud' to hear your shopping list spoken to you."
             )
         }
     }
@@ -124,6 +157,7 @@ fun SettingsScreen(
 private fun SettingToggleRow(
     title: String,
     description: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -142,6 +176,13 @@ private fun SettingToggleRow(
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(end = 16.dp).size(24.dp)
+        )
+    
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -164,5 +205,36 @@ private fun SettingToggleRow(
             onCheckedChange = null,
             modifier = Modifier.padding(start = 16.dp)
         )
+    }
+}
+
+@Composable
+private fun HelpRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    description: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        verticalAlignment = Alignment.Top
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(top = 2.dp, end = 16.dp).size(24.dp)
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

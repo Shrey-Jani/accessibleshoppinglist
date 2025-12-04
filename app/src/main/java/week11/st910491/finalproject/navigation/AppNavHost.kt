@@ -90,7 +90,17 @@ fun AppNavHost(
         composable(Routes.SHOPPING_LIST) {
             ShoppingListScreen(
                 navController = navController,
-                isOneHanded = isOneHanded
+                isOneHanded = isOneHanded,
+                onLogout = {
+                    // UX FIX: Reset One-Handed Mode on Logout so user isn't trapped
+                    kotlinx.coroutines.GlobalScope.launch {
+                        userPreferencesRepository.setOneHanded(false)
+                    }
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.SHOPPING_LIST) { inclusive = true }
+                    }
+                }
             )
         }
 
