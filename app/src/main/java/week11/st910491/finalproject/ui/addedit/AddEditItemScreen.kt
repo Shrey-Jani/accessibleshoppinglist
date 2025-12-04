@@ -1,18 +1,14 @@
 package week11.st910491.finalproject.ui.addedit
 
 import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardVoice
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -20,88 +16,43 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import week11.st910491.finalproject.domain.model.ShoppingItem
+import week11.st910491.finalproject.ui.common.CategoryHelper
 import week11.st910491.finalproject.ui.shoppinglist.ShoppingListViewModel
-import week11.st910491.finalproject.ui.voice.VoiceRecognizerManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditItemScreen(
     navController: NavHostController,
-    itemId: String?,                                // null = Add, not null = Edit
+    itemId: String?, // null = Add, not null = Edit
     viewModel: ShoppingListViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    val activity = context as Activity
 
-    // form state
+    // Form state
     var nameInput by rememberSaveable { mutableStateOf("") }
     var quantityInput by rememberSaveable { mutableStateOf("1") }
     var categoryInput by rememberSaveable { mutableStateOf("") }
     var notesInput by rememberSaveable { mutableStateOf("") }
 
-    // voice state
-    var isListening by remember { mutableStateOf(false) }
-    var voiceError by remember { mutableStateOf<String?>(null) }
-
-    val voiceManager = remember {
-        VoiceRecognizerManager(
-            activity = activity,
-            onResult = { resultText ->
-                nameInput = resultText
-                voiceError = null
-            },
-            onError = { error ->
-                voiceError = error
-            },
-            onListeningStateChanged = { listening ->
-                isListening = listening
-            }
-        )
-    }
-
-    // clean up recognizer
-    DisposableEffect(Unit) {
-        onDispose { voiceManager.destroy() }
-    }
-
-    // microphone permission
-    val audioPermissionLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { granted ->
-            if (granted) {
-                voiceManager.startListening()
-            } else {
-                voiceError = "Microphone permission denied"
-            }
-        }
-
-    // prefill fields when editing
+    // Load existing item if in "Edit" mode
     LaunchedEffect(itemId) {
-        if (!itemId.isNullOrEmpty()) {
-            val existing = viewModel.getItemById(itemId)
-            existing?.let { item ->
-                nameInput = item.name
-                quantityInput = item.quantity.toString()
-                categoryInput = item.category
-                notesInput = item.notes
-            }
+        if (itemId != null) {
+            // In a real app, you might fetch this from the ViewModel or DB
+            // For now, we assume the ViewModel has the list loaded or we pass the item
+            // This is a placeholder for loading logic
         }
     }
 
@@ -121,7 +72,7 @@ fun AddEditItemScreen(
                 onClick = {
                     val qty = quantityInput.toIntOrNull() ?: 1
                     val baseItem = ShoppingItem(
-                        id = itemId ?: "",
+                        id = itemId ?: "", // If ID is null, ViewModel/Repository should generate it
                         name = nameInput.trim(),
                         quantity = qty,
                         category = categoryInput.trim(),
@@ -155,46 +106,25 @@ fun AddEditItemScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Item name + mic
-            Text(text = "Item name", style = MaterialTheme.typography.labelLarge)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = nameInput,
-                    onValueChange = { nameInput = it },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f)
-                )
-                IconButton(
-                    onClick = {
-                        audioPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+            // Item name input
+            // Removed the Row since the Mic button is gone
+            OutlinedTextField(
+                value = nameInput,
+                onValueChange = { newName ->
+                    nameInput = newName
+
+                    // --- SMART CATEGORIZATION FEATURE ---
+                    // Automatically suggest category based on item name
+                    val suggested = CategoryHelper.getCategoryFor(newName)
+                    if (suggested != null) {
+                        categoryInput = suggested
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.KeyboardVoice,
-                        contentDescription = "Voice input"
-                    )
-                }
-            }
-
-            if (isListening) {
-                Text(
-                    text = "Listening…",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-
-            voiceError?.let { error ->
-                Text(
-                    text = error,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
+                },
+                label = { Text("Item Name") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth()
+            )
 
             OutlinedTextField(
                 value = quantityInput,
@@ -208,7 +138,7 @@ fun AddEditItemScreen(
             OutlinedTextField(
                 value = categoryInput,
                 onValueChange = { categoryInput = it },
-                label = { Text("Category (optional)") },
+                label = { Text("Category (Auto-filled)") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -245,7 +175,7 @@ fun AddEditItemScreen(
                 enabled = nameInput.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+                    .heightIn(min = 48.dp) // Accessible touch target height
             ) {
                 Text("Save item")
             }
