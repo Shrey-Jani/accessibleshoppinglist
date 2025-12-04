@@ -25,6 +25,7 @@ import week11.st910491.finalproject.domain.model.ShoppingItem
 import week11.st910491.finalproject.ui.common.CategoryHelper
 import week11.st910491.finalproject.ui.common.SpeechToTextParser
 import week11.st910491.finalproject.ui.shoppinglist.ShoppingListViewModel
+import java.util.UUID // <--- IMPORT THIS FOR UNIQUE IDs
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +55,7 @@ fun AddEditItemScreen(
     var categoryInput by rememberSaveable { mutableStateOf("") }
     var notesInput by rememberSaveable { mutableStateOf("") }
 
-    // --- 2. VOICE RESULT HANDLER (UPDATED FOR QUANTITY) ---
+    // --- 2. VOICE RESULT HANDLER ---
     LaunchedEffect(speechState.spokenText) {
         if (speechState.spokenText.isNotEmpty()) {
             val spoken = speechState.spokenText
@@ -64,7 +65,6 @@ fun AddEditItemScreen(
             val digitMatch = digitRegex.find(spoken)
 
             // B. Attempt to find number words (e.g. "five apples")
-            // Simple map for common small quantities
             val numberWords = mapOf(
                 "one" to "1", "two" to "2", "three" to "3", "four" to "4", "five" to "5",
                 "six" to "6", "seven" to "7", "eight" to "8", "nine" to "9", "ten" to "10",
@@ -72,7 +72,6 @@ fun AddEditItemScreen(
             )
             var wordMatchPair: Pair<String, String>? = null
             for ((word, digit) in numberWords) {
-                // Check for whole words only to avoid matching "one" inside "bone"
                 if (Regex("\\b$word\\b", RegexOption.IGNORE_CASE).containsMatchIn(spoken)) {
                     wordMatchPair = word to digit
                     break
@@ -81,23 +80,18 @@ fun AddEditItemScreen(
 
             // C. Extract logic
             if (digitMatch != null) {
-                // Case 1: Found digits (e.g., "5")
                 val quantity = digitMatch.value
                 quantityInput = quantity
-                // Remove the number from the string to get the name
                 nameInput = spoken.replaceFirst(quantity, "").trim()
             } else if (wordMatchPair != null) {
-                // Case 2: Found number word (e.g., "five")
                 val (word, digit) = wordMatchPair
                 quantityInput = digit
-                // Remove the word from the string (case-insensitive removal)
                 nameInput = spoken.replace(Regex("\\b$word\\b", RegexOption.IGNORE_CASE), "").trim()
             } else {
-                // Case 3: No quantity found, just text
                 nameInput = spoken
             }
 
-            // D. Trigger Smart Categorization on the extracted Name
+            // D. Trigger Smart Categorization
             val suggested = CategoryHelper.getCategoryFor(nameInput)
             if (suggested != null) {
                 categoryInput = suggested
@@ -108,7 +102,7 @@ fun AddEditItemScreen(
     // Load existing item if in "Edit" mode
     LaunchedEffect(itemId) {
         if (itemId != null) {
-            // Placeholder: Load item logic here if needed
+            // In a real app, you would fetch the item details here
         }
     }
 
@@ -127,12 +121,17 @@ fun AddEditItemScreen(
             FloatingActionButton(
                 onClick = {
                     val qty = quantityInput.toIntOrNull() ?: 1
+
+                    // --- CRITICAL FIX: GENERATE UUID FOR NEW ITEMS ---
+                    val uniqueId = itemId ?: UUID.randomUUID().toString()
+
                     val baseItem = ShoppingItem(
-                        id = itemId ?: "",
+                        id = uniqueId,
                         name = nameInput.trim(),
                         quantity = qty,
                         category = categoryInput.trim(),
-                        notes = notesInput.trim()
+                        notes = notesInput.trim(),
+                        isPurchased = false
                     )
 
                     if (itemId == null) {
@@ -261,12 +260,17 @@ fun AddEditItemScreen(
             Button(
                 onClick = {
                     val qty = quantityInput.toIntOrNull() ?: 1
+
+                    // --- CRITICAL FIX: GENERATE UUID FOR NEW ITEMS ---
+                    val uniqueId = itemId ?: UUID.randomUUID().toString()
+
                     val baseItem = ShoppingItem(
-                        id = itemId ?: "",
+                        id = uniqueId,
                         name = nameInput.trim(),
                         quantity = qty,
                         category = categoryInput.trim(),
-                        notes = notesInput.trim()
+                        notes = notesInput.trim(),
+                        isPurchased = false
                     )
 
                     if (itemId == null) {
