@@ -8,6 +8,7 @@ import androidx.navigation.NavType
 
 import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 import week11.st910491.finalproject.ui.addedit.AddEditItemScreen
 import week11.st910491.finalproject.ui.auth.AuthViewModel
 import week11.st910491.finalproject.ui.auth.ForgotPasswordScreen
@@ -21,14 +22,33 @@ fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
     userPreferencesRepository: week11.st910491.finalproject.data.UserPreferencesRepository,
-    isOneHanded: Boolean
+    isOneHanded: Boolean,
+    hasSeenOnboarding: Boolean
 ) {
     val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
+    
+    // Logic: If not seen onboarding -> Onboarding. Else if logged in -> Shopping List. Else -> Login.
+    val startDest = if (!hasSeenOnboarding) Routes.ONBOARDING else if (isLoggedIn) Routes.SHOPPING_LIST else Routes.LOGIN
 
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) Routes.SHOPPING_LIST else Routes.LOGIN
+        startDestination = startDest
     ) {
+        // Onboarding
+        composable(Routes.ONBOARDING) {
+            week11.st910491.finalproject.ui.onboarding.OnboardingScreen(
+                onFinish = {
+                    // Save preference and navigate to Login
+                    kotlinx.coroutines.GlobalScope.launch { // Ideally use a ViewModel or scope passed down
+                        userPreferencesRepository.setHasSeenOnboarding(true)
+                    }
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // Login
         composable(Routes.LOGIN) {
             LoginScreen(

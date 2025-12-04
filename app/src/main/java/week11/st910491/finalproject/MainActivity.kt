@@ -25,6 +25,7 @@ class MainActivity : ComponentActivity() {
             val isHighContrast by userPreferencesRepository.isHighContrast.collectAsState(initial = false)
             val isLargeText by userPreferencesRepository.isLargeText.collectAsState(initial = false)
             val isOneHanded by userPreferencesRepository.isOneHanded.collectAsState(initial = false)
+            val hasSeenOnboarding by userPreferencesRepository.hasSeenOnboarding.collectAsState(initial = false)
 
             AccessibleShoppingListTheme(
                 highContrast = isHighContrast,
@@ -38,7 +39,8 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         authViewModel = authViewModel,
                         userPreferencesRepository = userPreferencesRepository,
-                        isOneHanded = isOneHanded
+                        isOneHanded = isOneHanded,
+                        hasSeenOnboarding = hasSeenOnboarding
                     )
                 }
             }

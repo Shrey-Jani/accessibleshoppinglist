@@ -41,60 +41,48 @@ fun ShoppingListItemCard(
     isHighContrast: Boolean = false,
     isLargeText: Boolean = false
 ) {
-    val shape = RoundedCornerShape(8.dp)
-    val bg = if (item.isPurchased) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
-    val contentDesc = "${item.name}, quantity ${item.quantity}, ${if (item.isPurchased) "purchased" else "not purchased"}"
-
-    Card(
+    // We don't need the Card wrapper here anymore because AccessibleCard wraps this content
+    // But we keep the Row layout
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
             .clickable(onClick = onClick)
-            .semantics {
-                this.contentDescription = contentDesc
-                this.role = Role.Button
-            },
-        shape = shape,
-        colors = CardDefaults.cardColors(containerColor = bg),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(8.dp), // Inner padding
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Checkbox(
-                checked = item.isPurchased,
-                onCheckedChange = { onTogglePurchased() },
-                modifier = Modifier.size(24.dp)
+        Checkbox(
+            checked = item.isPurchased,
+            onCheckedChange = { onTogglePurchased() },
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(16.dp)) // More space
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = item.name,
+                style = if (isLargeText) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold, // Bold text
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textDecoration = if (item.isPurchased) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+                color = if (item.isPurchased) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
             )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Quantity: ${item.quantity}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = item.name,
-                    style = if (isLargeText) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Quantity: ${item.quantity}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            IconButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete ${item.name}",
-                    tint = if (isHighContrast) Color.Black else MaterialTheme.colorScheme.error
-                )
-            }
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete ${item.name}",
+                tint = if (isHighContrast) Color.Yellow else MaterialTheme.colorScheme.error // Yellow in high contrast
+            )
         }
     }
 }

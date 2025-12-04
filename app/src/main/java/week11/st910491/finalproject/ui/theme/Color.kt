@@ -12,22 +12,23 @@ val PurpleGrey40 = Color(0xFF625B71)
 val Pink40 = Color(0xFF7D5260)
 
 // New, high-contrast friendly palette
-val PrimaryBlue = Color(0xFF2563EB)
-val PrimaryBlueDark = Color(0xFF60A5FA)
+// Premium Palette (Deep Indigo & Soft Surface)
+val PrimaryIndigo = Color(0xFF4F46E5) // Indigo 600
+val PrimaryIndigoDark = Color(0xFF818CF8) // Indigo 400
 
-val SupportGreen = Color(0xFF059669)
-val SupportGreenDark = Color(0xFF6EE7B7)
+val SecondaryViolet = Color(0xFF7C3AED) // Violet 600
+val SecondaryVioletDark = Color(0xFFA78BFA) // Violet 400
 
-val BackgroundLight = Color(0xFFF9FAFB)
+val BackgroundLight = Color(0xFFF3F4F6) // Cool Gray 100
 val SurfaceLight = Color(0xFFFFFFFF)
-val TextPrimaryLight = Color(0xFF111827)
+val TextPrimaryLight = Color(0xFF1F2937) // Gray 800
 
-val BackgroundDark = Color(0xFF020617)
-val SurfaceDark = Color(0xFF020617)
-val TextPrimaryDark = Color(0xFFF9FAFB)
+val BackgroundDark = Color(0xFF111827) // Gray 900
+val SurfaceDark = Color(0xFF1F2937) // Gray 800
+val TextPrimaryDark = Color(0xFFF9FAFB) // Gray 50
 
-val ErrorRed = Color(0xFFDC2626)
-val ErrorRedDark = Color(0xFFFCA5A5)
+val ErrorRed = Color(0xFFEF4444)
+val ErrorRedDark = Color(0xFFF87171)
 
 // High Contrast Palette
 val HighContrastBackground = Color(0xFF000000)
