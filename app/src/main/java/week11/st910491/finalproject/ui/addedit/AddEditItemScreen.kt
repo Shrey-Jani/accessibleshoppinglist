@@ -107,9 +107,19 @@ fun AddEditItemScreen(
     }
 
     // Load existing item if in "Edit" mode
+    var isLoading by remember { mutableStateOf(false) }
+
     LaunchedEffect(itemId) {
         if (itemId != null) {
-            // In a real app, you would fetch the item details here
+            isLoading = true
+            val item = viewModel.getItemById(itemId)
+            if (item != null) {
+                nameInput = item.name
+                quantityInput = item.quantity.toString()
+                categoryInput = item.category
+                notesInput = item.notes
+            }
+            isLoading = false
         }
     }
 
