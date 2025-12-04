@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,10 +20,12 @@ fun AccessibleCard(
     contentDesc: String? = null,
     content: @Composable () -> Unit
 ) {
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(16.dp) // Modern rounded corners
     val borderModifier = if (isHighContrast) {
-        modifier.border(2.dp, Color.Black, shape)
-    } else modifier
+        modifier.border(2.dp, Color.White, shape) // White border for visibility on black
+    } else {
+        modifier // No border in premium mode, just shadow
+    }
 
     Card(
         modifier = borderModifier.then(
@@ -30,9 +33,13 @@ fun AccessibleCard(
                 this.contentDescription = contentDesc
             } else Modifier
         ),
-        colors = CardDefaults.cardColors()
+        shape = shape,
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isHighContrast) 0.dp else 4.dp), // Soft shadow
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
     ) {
-        androidx.compose.foundation.layout.Box(modifier = Modifier.padding(8.dp)) {
+        androidx.compose.foundation.layout.Box(modifier = Modifier.padding(12.dp)) { // More breathing room
             content()
         }
     }
