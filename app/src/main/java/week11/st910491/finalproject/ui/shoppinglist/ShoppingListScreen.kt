@@ -19,11 +19,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -70,11 +77,41 @@ fun ShoppingListScreen(
         onDispose { ttsManager.shutdown() }
     }
 
+    // --- FINISH SHOPPING DIALOG ---
+    var showFinishDialog by remember { mutableStateOf(false) }
+
+    if (showFinishDialog) {
+        AlertDialog(
+            onDismissRequest = { showFinishDialog = false },
+            title = { Text("Finish Shopping?") },
+            text = { Text("This will save your trip history and clear your current list. Are you sure?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.finishShopping()
+                        showFinishDialog = false
+                    }
+                ) {
+                    Text("Yes, Finish")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFinishDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Shopping list") },
                 actions = {
+                    // NEW: Analytics Button
+                    IconButton(onClick = { navController.navigate(Routes.ANALYTICS) }) {
+                        Icon(Icons.Default.BarChart, contentDescription = "Analytics")
+                    }
                     TextButton(onClick = { navController.navigate(Routes.SETTINGS) }) {
                         Text("Settings")
                     }
@@ -87,10 +124,27 @@ fun ShoppingListScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { navController.navigate(Routes.ADD_EDIT_ITEM) }
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Add item")
+                // FINISH SHOPPING BUTTON
+                if (items.isNotEmpty()) {
+                    ExtendedFloatingActionButton(
+                        onClick = { showFinishDialog = true },
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        icon = { Icon(Icons.Default.CheckCircle, contentDescription = null) },
+                        text = { Text("Finish Shopping") }
+                    )
+                }
+
+                // ADD ITEM BUTTON
+                ExtendedFloatingActionButton(
+                    onClick = { navController.navigate(Routes.ADD_EDIT_ITEM) },
+                    icon = { Icon(Icons.Default.Add, contentDescription = "Add Item") },
+                    text = { Text("Add Item") }
+                )
             }
         }
     ) { paddingValues ->

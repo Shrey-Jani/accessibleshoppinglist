@@ -10,4 +10,5 @@ object Routes {
     const val ADD_EDIT_ITEM = "add_edit_item"
     const val ADD_EDIT_ITEM_WITH_ID = "add_edit_item/{itemId}"
     const val ONBOARDING = "onboarding"
+    const val ANALYTICS = "analytics"
 }

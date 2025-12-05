@@ -148,4 +148,40 @@ class ShoppingListViewModel : ViewModel() {
         val repo = getRepository()
         return repo?.getItemById(id)
     }
+
+    fun finishShopping() {
+        val repo = getRepository() ?: return
+        val currentItems = _uiState.value.data ?: return
+
+        if (currentItems.isEmpty()) {
+            _uiState.value = _uiState.value.copy(errorMessage = "List is empty!")
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                // 1. Calculate Stats
+                val totalItems = currentItems.sumOf { it.quantity }
+                val categorySummary = currentItems
+                    .groupBy { it.category }
+                    .mapValues { entry -> entry.value.sumOf { it.quantity } }
+
+                val session = week11.st910491.finalproject.domain.model.ShoppingSession(
+                    totalItems = totalItems,
+                    categorySummary = categorySummary
+                )
+
+                // 2. Save Session (History)
+                repo.saveShoppingSession(session)
+
+                // 3. Clear List
+                repo.clearAllItems()
+
+                // 4. Feedback
+                _uiState.value = _uiState.value.copy(errorMessage = null) // Success (could use a snackbar event)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Error finishing shopping: ${e.message}")
+            }
+        }
+    }
 }

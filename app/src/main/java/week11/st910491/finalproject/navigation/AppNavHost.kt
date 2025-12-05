@@ -112,6 +112,11 @@ fun AppNavHost(
             )
         }
 
+        // NEW: Analytics Dashboard
+        composable(Routes.ANALYTICS) {
+            week11.st910491.finalproject.ui.analytics.AnalyticsScreen(navController = navController)
+        }
+
         // Add/Edit item
         composable(Routes.ADD_EDIT_ITEM) {
             AddEditItemScreen(

@@ -92,4 +92,30 @@ class FirestoreShoppingListRepository(
             createdAt = doc.getLong("createdAt") ?: 0L
         )
     }
+
+    // --- ANALYTICS & SESSION MANAGEMENT ---
+
+    suspend fun saveShoppingSession(session: week11.st910491.finalproject.domain.model.ShoppingSession) {
+        val sessionsCollection = db
+            .collection("users")
+            .document(userId)
+            .collection("sessions")
+
+        val data = mapOf(
+            "date" to session.date,
+            "totalItems" to session.totalItems,
+            "categorySummary" to session.categorySummary
+        )
+        sessionsCollection.add(data).await()
+    }
+
+    suspend fun clearAllItems() {
+        // Firestore batch delete
+        val snapshot = itemsCollection.get().await()
+        val batch = db.batch()
+        for (doc in snapshot.documents) {
+            batch.delete(doc.reference)
+        }
+        batch.commit().await()
+    }
 }
