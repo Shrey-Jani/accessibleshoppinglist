@@ -3,7 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
     <!-- Permission to use microphone -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
     <!--  declaring that you use microphone -->
     <uses-feature
         android:name="android.hardware.microphone"

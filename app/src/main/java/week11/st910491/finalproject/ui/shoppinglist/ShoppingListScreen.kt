@@ -1,5 +1,6 @@
 package week11.st910491.finalproject.ui.shoppinglist
 
+import android.widget.Toast // Added for debugging
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,8 @@ import week11.st910491.finalproject.ui.common.AccessibleButton
 import week11.st910491.finalproject.ui.common.AccessibleCard
 import week11.st910491.finalproject.ui.voice.TextToSpeechManager
 
+// ... imports ...
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShoppingListScreen(
@@ -44,10 +47,15 @@ fun ShoppingListScreen(
 
     // --- TTS Setup ---
     val context = LocalContext.current
-    val ttsManager = remember { TextToSpeechManager(context) }
+
+    // FIX: Pass 'context' as a key. If context changes, recreate the manager.
+    val ttsManager = remember(context) { TextToSpeechManager(context) }
+
     DisposableEffect(Unit) {
         onDispose { ttsManager.shutdown() }
     }
+
+    // ... Rest of your code remains exactly the same ...
 
     Scaffold(
         topBar = {
@@ -88,7 +96,7 @@ fun ShoppingListScreen(
             }
         }
     ) { paddingValues ->
-        // FIX: Using a single LazyColumn for EVERYTHING ensures perfect scrolling
+        // Single LazyColumn for scrolling content
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -109,6 +117,10 @@ fun ShoppingListScreen(
                             "You have ${items.size} items. " +
                                     items.joinToString(", ") { "${it.quantity} ${it.name}" }
                         }
+
+                        // DEBUG: Show a toast to verify the button was clicked
+                        Toast.makeText(context, "Reading: $textToRead", Toast.LENGTH_SHORT).show()
+
                         ttsManager.speak(textToRead)
                     }
                 )
@@ -141,7 +153,6 @@ fun ShoppingListScreen(
             }
 
             // 3. CONTENT: Shopping Items
-            // Note: We use 'items' (plural) here, which works inside LazyColumn
             if (!state.isLoading && items.isNotEmpty()) {
                 items(items) { item ->
                     ShoppingListItemCard(
@@ -155,7 +166,7 @@ fun ShoppingListScreen(
                 }
             }
 
-            // Add extra spacer at bottom so FAB doesn't cover last item
+            // Add extra spacer at bottom
             item {
                 Spacer(modifier = Modifier.height(80.dp))
             }
@@ -189,12 +200,13 @@ private fun ShoppingListItemCard(
     onDelete: () -> Unit,
     onClick: () -> Unit
 ) {
+    // This is the Wrapper from Components.kt
     AccessibleCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick
     ) {
-        // ... (This part of the card UI remains exactly the same) ...
-        AccessibleCard(
+        // This is the Helper function defined below (Renamed to avoid conflict)
+        ShoppingItemContent(
             item = item,
             onTogglePurchased = onTogglePurchased,
             onDelete = onDelete
@@ -202,9 +214,9 @@ private fun ShoppingListItemCard(
     }
 }
 
-// Helper to keep the file clean - paste this at the bottom if not using the inline version above
+// Renamed from "AccessibleCard" to "ShoppingItemContent" to avoid naming conflict
 @Composable
-fun AccessibleCard(
+fun ShoppingItemContent(
     item: ShoppingItem,
     onTogglePurchased: () -> Unit,
     onDelete: () -> Unit
