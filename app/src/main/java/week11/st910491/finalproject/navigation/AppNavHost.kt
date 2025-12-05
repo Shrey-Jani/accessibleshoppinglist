@@ -121,7 +121,7 @@ fun AppNavHost(
         composable(Routes.ADD_EDIT_ITEM) {
             AddEditItemScreen(
                 navController = navController,
-                itemId = null // TODO: Handle edit mode properly if needed
+                itemId = null
             )
         }
 
