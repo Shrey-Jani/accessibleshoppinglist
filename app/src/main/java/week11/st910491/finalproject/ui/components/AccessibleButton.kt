@@ -42,12 +42,13 @@ fun AccessibleButton(
         modifier = modifier
             .heightIn(min = minHeight)
             .padding(0.dp)
-            .then(
-                if (contentDesc != null) Modifier.semantics {
+            .semantics {
+                // Always mark as button for TalkBack, even if we don't override description
+                this.role = Role.Button
+                if (contentDesc != null) {
                     this.contentDescription = contentDesc
-                    this.role = Role.Button
-                } else Modifier
-            ),
+                }
+            },
         shape = shape,
         border = border,
         colors = colors
