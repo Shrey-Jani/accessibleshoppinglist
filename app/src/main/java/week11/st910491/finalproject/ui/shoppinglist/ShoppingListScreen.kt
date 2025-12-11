@@ -46,6 +46,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -110,7 +112,10 @@ fun ShoppingListScreen(
                 actions = {
                     // NEW: Analytics Button
                     IconButton(onClick = { navController.navigate(Routes.ANALYTICS) }) {
-                        Icon(Icons.Default.BarChart, contentDescription = "Analytics")
+                        Icon(
+                            Icons.Default.BarChart,
+                            contentDescription = "View shopping analytics"
+                        )
                     }
                     TextButton(onClick = { navController.navigate(Routes.SETTINGS) }) {
                         Text("Settings")
@@ -134,7 +139,16 @@ fun ShoppingListScreen(
                         onClick = { showFinishDialog = true },
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        icon = { Icon(Icons.Default.CheckCircle, contentDescription = null) },
+                        modifier = Modifier.semantics {
+                            // Make the purpose very clear for screen readers
+                            this.contentDescription = "Finish current shopping trip and clear the list"
+                        },
+                        icon = {
+                            Icon(
+                                Icons.Default.CheckCircle,
+                                contentDescription = null
+                            )
+                        },
                         text = { Text("Finish Shopping") }
                     )
                 }
@@ -142,7 +156,15 @@ fun ShoppingListScreen(
                 // ADD ITEM BUTTON
                 ExtendedFloatingActionButton(
                     onClick = { navController.navigate(Routes.ADD_EDIT_ITEM) },
-                    icon = { Icon(Icons.Default.Add, contentDescription = "Add Item") },
+                    modifier = Modifier.semantics {
+                        this.contentDescription = "Add a new shopping list item"
+                    },
+                    icon = {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = null
+                        )
+                    },
                     text = { Text("Add Item") }
                 )
             }
