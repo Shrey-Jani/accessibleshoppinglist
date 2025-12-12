@@ -26,7 +26,7 @@ fun AppNavHost(
     hasSeenOnboarding: Boolean
 ) {
     val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
-    
+
     // Logic: If not seen onboarding -> Onboarding. Else if logged in -> Shopping List. Else -> Login.
     val startDest = if (!hasSeenOnboarding) Routes.ONBOARDING else if (isLoggedIn) Routes.SHOPPING_LIST else Routes.LOGIN
 
@@ -82,7 +82,9 @@ fun AppNavHost(
         composable(Routes.FORGOT) {
             ForgotPasswordScreen(
                 viewModel = authViewModel,
-                onResetDone = { navController.popBackStack() }
+                onResetDone = { navController.popBackStack() },
+                // Add this line to handle the back button click:
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
